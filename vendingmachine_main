@@ -1,0 +1,98 @@
+module vendingmachine(in, clk, rst, out, change);
+  input [1:0] in;
+  input clk, rst;
+  output reg [1:0] change;
+  output reg out;
+  
+  parameter s0 = 2'b00;  // 0rs - 00 , 5rs - 01, 10rs - 10
+  parameter s1 = 2'b01;
+  parameter s2 = 2'b10;
+  
+  reg [1:0] n_state;
+  reg [1:0] p_state;
+  
+  always @(posedge clk) begin 
+    if (rst == 1) begin 
+      p_state <= s0;
+      n_state <= s0;
+      change <= 2'b00;
+      out <= 0;
+    end
+    else begin
+      p_state <= n_state;
+
+      case (p_state)
+        s0: begin
+          if (in == 2'b01) begin
+            n_state = s1;
+            change = 2'b00;
+            out = 0;
+          end
+          else if (in == 2'b10) begin
+            n_state = s2;
+            change = 2'b00;
+            out = 0;
+          end
+          else begin
+            n_state = s0;
+            change = 2'b00;
+            out = 0;
+          end
+        end
+
+        s1: begin
+          if (in == 2'b01) begin
+            n_state = s2;
+            change = 2'b00;
+            out = 0;
+          end
+          else if (in == 2'b00) begin 
+            n_state = s1;
+            change = 2'b00;
+            out = 0;
+          end
+          else if (in == 2'b10) begin
+            n_state = s0;
+            change = 2'b00;
+            out = 1;
+          end
+          else begin
+            n_state = s1;
+            change = 2'b00;
+            out = 0;
+          end
+        end
+
+        s2: begin 
+          if (in == 2'b00) begin
+            n_state = s2;
+            change = 2'b00;
+            out = 0;
+          end
+          else if (in == 2'b01) begin
+            n_state = s0;
+            change = 2'b00;
+            out = 1;
+          end
+          else if (in == 2'b10) begin
+            n_state = s0;
+            change = 2'b01;
+            out = 1;
+          end
+          else begin
+            n_state = s2;
+            change = 2'b00;
+            out = 0;
+          end
+        end
+
+        default: begin
+          n_state = s0;
+          change = 2'b00;
+          out = 0;
+        end
+      endcase
+    end
+  end
+
+endmodule
