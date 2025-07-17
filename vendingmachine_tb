@@ -1,0 +1,44 @@
+module vendingmachine_tb;
+
+  reg [1:0] in;
+  reg clk, rst;
+  wire [1:0] change;
+  wire out;
+
+  // Instantiate the vending machine
+  vendingmachine vm (
+    .in(in),
+    .clk(clk),
+    .rst(rst),
+    .change(change),
+    .out(out)
+  );
+
+  // Clock generation
+  always #5 clk = ~clk;
+
+  initial begin
+    clk = 0;
+    rst = 1;
+    in = 2'b00;
+
+    #10 rst = 0;
+
+    // Insert ₹5, then ₹10 → should dispense product (₹15)
+    #10 in = 2'b01;  // ₹5
+    #10 in = 2'b10;  // ₹10 → out = 1
+    #10 in = 2'b00;
+
+    // Insert ₹10 + ₹10 → should give change
+    #10 in = 2'b10;
+    #10 in = 2'b10;  // → out = 1, change = 2'b01
+    #10 in = 2'b00;
+
+    #20 $finish;
+  end
+
+  initial begin
+    $monitor("Time=%0t | in=%b | out=%b | change=%b", $time, in, out, change);
+  end
+
+endmodule
